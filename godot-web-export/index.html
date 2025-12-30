@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ANIMAL TAP 🐾</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard', cursive;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 50%, #ffeaa7 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            height: 100vh;
+            max-height: 800px;
+            background: linear-gradient(180deg, #e8f5e9 0%, #fff9c4 50%, #ffccbc 100%);
+            border: 6px solid #5d4037;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        /* Start Screen */
+        #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #fff3e0 0%, #ffe0b2 50%, #ffcc80 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .doodle-title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #5d4037;
+            text-shadow: 4px 4px 0 #ffab91, 6px 6px 0 #ff8a65;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            animation: bounce 1s ease infinite;
+        }
+
+        .doodle-subtitle {
+            font-size: 24px;
+            color: #8d6e63;
+            margin-bottom: 30px;
+        }
+
+        .animal-parade {
+            font-size: 40px;
+            margin-bottom: 30px;
+            animation: wiggle 2s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+
+        .start-btn, .restart-btn {
+            padding: 20px 50px;
+            font-size: 28px;
+            font-family: inherit;
+            background: linear-gradient(180deg, #81c784 0%, #4caf50 100%);
+            color: white;
+            border: 4px solid #2e7d32;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #1b5e20, 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.1s;
+            text-shadow: 2px 2px 0 #2e7d32;
+        }
+
+        .start-btn:hover, .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #1b5e20, 0 12px 25px rgba(0,0,0,0.25);
+        }
+
+        .start-btn:active, .restart-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #1b5e20, 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .high-score-display {
+            margin-top: 30px;
+            font-size: 18px;
+            color: #5d4037;
+            background: rgba(255,255,255,0.7);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 3px dashed #8d6e63;
+        }
+
+        .player-name-input {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .player-name-input label {
+            font-size: 16px;
+            color: #5d4037;
+        }
+
+        .player-name-input input {
+            padding: 10px 20px;
+            font-size: 18px;
+            font-family: inherit;
+            border: 3px solid #8d6e63;
+            border-radius: 25px;
+            text-align: center;
+            width: 200px;
+            background: #fff9c4;
+        }
+
+        /* Game Screen */
+        #gameScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        #gameHUD {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 100%);
+            border-bottom: 4px solid #8d6e63;
+            z-index: 10;
+        }
+
+        .hud-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .timer-display {
+            font-size: 28px;
+            font-weight: bold;
+            color: #e53935;
+            background: #ffebee;
+            padding: 5px 15px;
+            border-radius: 15px;
+            border: 3px solid #e53935;
+        }
+
+        .timer-display.warning {
+            animation: pulse 0.5s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .score-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1976d2;
+            background: #e3f2fd;
+            padding: 5px 15px;
+            border-radius: 15px;
+            border: 3px solid #1976d2;
+        }
+
+        .high-score-hud {
+            font-size: 14px;
+            color: #ff9800;
+            background: #fff3e0;
+            padding: 3px 10px;
+            border-radius: 10px;
+            border: 2px solid #ff9800;
+        }
+
+        .target-display {
+            text-align: center;
+            font-size: 22px;
+            color: #5d4037;
+            background: #fff9c4;
+            padding: 10px;
+            border-radius: 15px;
+            border: 3px dashed #ff9800;
+        }
+
+        .target-animal {
+            font-size: 36px;
+            display: inline-block;
+            animation: bounce 0.5s ease infinite;
+        }
+
+        #gameCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Game Over Screen */
+        #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #ffccbc 0%, #ffab91 50%, #ff8a65 100%);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .game-over-title {
+            font-size: 42px;
+            font-weight: bold;
+            color: #d32f2f;
+            text-shadow: 3px 3px 0 #ffcdd2;
+            margin-bottom: 20px;
+        }
+
+        .final-score {
+            font-size: 60px;
+            font-weight: bold;
+            color: #5d4037;
+            margin-bottom: 10px;
+        }
+
+        .final-score-label {
+            font-size: 24px;
+            color: #8d6e63;
+            margin-bottom: 20px;
+        }
+
+        .new-high-score {
+            font-size: 28px;
+            color: #ff6f00;
+            animation: bounce 0.5s ease infinite;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .leaderboard {
+            background: rgba(255,255,255,0.8);
+            padding: 15px 25px;
+            border-radius: 15px;
+            border: 3px solid #8d6e63;
+            margin-bottom: 30px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .leaderboard h3 {
+            color: #5d4037;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            font-size: 14px;
+            color: #5d4037;
+            padding: 3px 0;
+        }
+
+        .leaderboard-entry.current {
+            font-weight: bold;
+            color: #ff6f00;
+        }
+
+        /* Feedback animations */
+        .tap-feedback {
+            position: absolute;
+            pointer-events: none;
+            font-size: 30px;
+            font-weight: bold;
+            animation: feedbackPop 0.5s ease forwards;
+            z-index: 50;
+        }
+
+        .tap-feedback.correct {
+            color: #4caf50;
+        }
+
+        .tap-feedback.wrong {
+            color: #f44336;
+        }
+
+        @keyframes feedbackPop {
+            0% { transform: scale(0.5) translateY(0); opacity: 1; }
+            100% { transform: scale(1.5) translateY(-50px); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Start Screen -->
+        <div id="startScreen">
+            <div class="doodle-title">ANIMAL TAP</div>
+            <div class="doodle-subtitle">🐾 Tap the right animal! 🐾</div>
+            <div class="animal-parade">🐶🐱🐮🐘🦁🐰🐷🐸</div>
+            
+            <div class="player-name-input">
+                <label for="playerName">Your Name:</label>
+                <input type="text" id="playerName" placeholder="Enter name" maxlength="15">
+            </div>
+            
+            <button class="start-btn" id="startBtn">🎮 START 🎮</button>
+            
+            <div class="high-score-display" id="startHighScore">
+                High Score: 0
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen">
+            <canvas id="gameCanvas"></canvas>
+            <div id="gameHUD">
+                <div class="hud-top">
+                    <div class="timer-display" id="timerDisplay">⏱️ 30</div>
+                    <div class="high-score-hud" id="hudHighScore">Best: 0</div>
+                    <div class="score-display" id="scoreDisplay">⭐ 0</div>
+                </div>
+                <div class="target-display">
+                    Tap ONLY the <span class="target-animal" id="targetAnimal">🐶</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen">
+            <div class="game-over-title">⏰ TIME'S UP! ⏰</div>
+            <div class="final-score-label">Your Score</div>
+            <div class="final-score" id="finalScore">0</div>
+            <div class="new-high-score" id="newHighScore">🏆 NEW HIGH SCORE! 🏆</div>
+            
+            <div class="leaderboard" id="leaderboard">
+                <h3>🏅 Top Scores 🏅</h3>
+                <div id="leaderboardEntries"></div>
+            </div>
+            
+            <button class="restart-btn" id="restartBtn">🔄 PLAY AGAIN 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Configuration
+        const GAME_DURATION = 30;
+        const ANIMALS = [
+            { emoji: '🐶', name: 'Dog' },
+            { emoji: '🐱', name: 'Cat' },
+            { emoji: '🐮', name: 'Cow' },
+            { emoji: '🐘', name: 'Elephant' },
+            { emoji: '🦁', name: 'Lion' },
+            { emoji: '🐰', name: 'Rabbit' },
+            { emoji: '🐷', name: 'Pig' },
+            { emoji: '🐸', name: 'Frog' },
+            { emoji: '🐻', name: 'Bear' },
+            { emoji: '🦊', name: 'Fox' },
+            { emoji: '🐼', name: 'Panda' },
+            { emoji: '🦄', name: 'Unicorn' }
+        ];
+
+        // Game State
+        let gameState = {
+            isPlaying: false,
+            score: 0,
+            timeLeft: GAME_DURATION,
+            targetAnimal: null,
+            animals: [],
+            spawnRate: 1500,
+            lastSpawnTime: 0,
+            animationId: null,
+            timerInterval: null,
+            playerName: '',
+            highScore: 0,
+            scores: []
+        };
+
+        // DOM Elements
+        const startScreen = document.getElementById('startScreen');
+        const gameScreen = document.getElementById('gameScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const timerDisplay = document.getElementById('timerDisplay');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const targetAnimalDisplay = document.getElementById('targetAnimal');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const playerNameInput = document.getElementById('playerName');
+        const startHighScoreDisplay = document.getElementById('startHighScore');
+        const hudHighScoreDisplay = document.getElementById('hudHighScore');
+        const newHighScoreDisplay = document.getElementById('newHighScore');
+        const leaderboardEntries = document.getElementById('leaderboardEntries');
+        const gameContainer = document.getElementById('gameContainer');
+
+        // Game ID for localStorage
+        const GAME_ID = 'animal-tap';
+
+        // Initialize
+        function init() {
+            resizeCanvas();
+            loadGameData();
+            updateHighScoreDisplays();
+            
+            // Pre-fill player name
+            if (gameState.playerName) {
+                playerNameInput.value = gameState.playerName;
+            }
+
+            startBtn.addEventListener('click', startGame);
+            restartBtn.addEventListener('click', restartGame);
+            canvas.addEventListener('click', handleTap);
+            canvas.addEventListener('touchstart', handleTouch, { passive: false });
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        function resizeCanvas() {
+            const rect = gameContainer.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        // LocalStorage Functions
+        function loadGameData() {
+            try {
+                const savedData = localStorage.getItem(`applaa-game-data-${GAME_ID}`);
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    gameState.highScore = data.highScore || 0;
+                    gameState.scores = data.scores || [];
+                    gameState.playerName = data.lastPlayerName || '';
+                }
+            } catch (e) {
+                console.log('No saved data found');
+            }
+        }
+
+        function saveGameData() {
+            try {
+                const data = {
+                    gameId: GAME_ID,
+                    highScore: gameState.highScore,
+                    scores: gameState.scores.slice(0, 10), // Keep top 10
+                    lastPlayerName: gameState.playerName
+                };
+                localStorage.setItem(`applaa-game-data-${GAME_ID}`, JSON.stringify(data));
+                
+                // Also try to send to parent (Applaa system)
+                window.parent.postMessage({
+                    type: 'applaa-game-save-score',
+                    gameId: GAME_ID,
+                    playerName: gameState.playerName,
+                    score: gameState.score
+                }, '*');
+            } catch (e) {
+                console.log('Could not save data');
+            }
+        }
+
+        function updateHighScoreDisplays() {
+            startHighScoreDisplay.textContent = `High Score: ${gameState.highScore}`;
+            startHighScoreDisplay.style.display = 'block';
+            hudHighScoreDisplay.textContent = `Best: ${gameState.highScore}`;
+            hudHighScoreDisplay.style.display = 'block';
+        }
+
+        function addScore(playerName, score) {
+            gameState.scores.push({
+                playerName: playerName,
+                score: score,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Sort by score descending
+            gameState.scores.sort((a, b) => b.score - a.score);
+            
+            // Keep only top 10
+            gameState.scores = gameState.scores.slice(0, 10);
+            
+            // Update high score
+            if (score > gameState.highScore) {
+                gameState.highScore = score;
+            }
+        }
+
+        function displayLeaderboard(currentScore) {
+            leaderboardEntries.innerHTML = '';
+            
+            const topScores = gameState.scores.slice(0, 5);
+            topScores.forEach((entry, index) => {
+                const div = document.createElement('div');
+                div.className = 'leaderboard-entry';
+                if (entry.score === currentScore && entry.playerName === gameState.playerName) {
+                    div.className += ' current';
+                }
+                div.innerHTML = `<span>${index + 1}. ${entry.playerName}</span><span>${entry.score}</span>`;
+                leaderboardEntries.appendChild(div);
+            });
+        }
+
+        // Game Functions
+        function startGame() {
+            gameState.playerName = playerNameInput.value.trim() || 'Player';
+            gameState.isPlaying = true;
+            gameState.score = 0;
+            gameState.timeLeft = GAME_DURATION;
+            gameState.animals = [];
+            gameState.spawnRate = 1500;
+            gameState.lastSpawnTime = 0;
+
+            // Select random target animal
+            gameState.targetAnimal = ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+            targetAnimalDisplay.textContent = gameState.targetAnimal.emoji;
+
+            // Update displays
+            updateScore();
+            updateTimer();
+            updateHighScoreDisplays();
+
+            // Switch screens
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+
+            // Start timer
+            gameState.timerInterval = setInterval(() => {
+                gameState.timeLeft--;
+                updateTimer();
+                
+                // Increase difficulty
+                if (gameState.timeLeft % 5 === 0 && gameState.spawnRate > 500) {
+                    gameState.spawnRate -= 100;
+                }
+                
+                if (gameState.timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            // Start game loop
+            gameState.lastSpawnTime = Date.now();
+            gameLoop();
+        }
+
+        function restartGame() {
+            // Clear any existing intervals/animations
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            if (gameState.animationId) {
+                cancelAnimationFrame(gameState.animationId);
+            }
+            
+            startGame();
+        }
+
+        function endGame() {
+            gameState.isPlaying = false;
+            
+            // Clear timer and animation
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            if (gameState.animationId) {
+                cancelAnimationFrame(gameState.animationId);
+            }
+
+            // Save score
+            const isNewHighScore = gameState.score > gameState.highScore;
+            addScore(gameState.playerName, gameState.score);
+            saveGameData();
+
+            // Update game over screen
+            finalScoreDisplay.textContent = gameState.score;
+            newHighScoreDisplay.style.display = isNewHighScore ? 'block' : 'none';
+            displayLeaderboard(gameState.score);
+
+            // Show game over screen
+            gameScreen.style.display = 'none';
+            gameOverScreen.style.display = 'flex';
+        }
+
+        function updateScore() {
+            scoreDisplay.textContent = `⭐ ${gameState.score}`;
+        }
+
+        function updateTimer() {
+            timerDisplay.textContent = `⏱️ ${gameState.timeLeft}`;
+            if (gameState.timeLeft <= 10) {
+                timerDisplay.classList.add('warning');
+            } else {
+                timerDisplay.classList.remove('warning');
+            }
+        }
+
+        // Animal Spawning
+        function spawnAnimal() {
+            const hudHeight = 120;
+            const padding = 50;
+            const size = 60 + Math.random() * 30;
+            
+            const animal = {
+                ...ANIMALS[Math.floor(Math.random() * ANIMALS.length)],
+                x: padding + Math.random() * (canvas.width - padding * 2 - size),
+                y: hudHeight + padding + Math.random() * (canvas.height - hudHeight - padding * 2 - size),
+                size: size,
+                opacity: 0,
+                scale: 0.5,
+                lifetime: 2000 + Math.random() * 1500,
+                spawnTime: Date.now(),
+                rotation: (Math.random() - 0.5) * 0.3
+            };
+            
+            gameState.animals.push(animal);
+        }
+
+        // Game Loop
+        function gameLoop() {
+            if (!gameState.isPlaying) return;
+
+            const now = Date.now();
+
+            // Spawn animals
+            if (now - gameState.lastSpawnTime > gameState.spawnRate) {
+                spawnAnimal();
+                gameState.lastSpawnTime = now;
+            }
+
+            // Update and filter animals
+            gameState.animals = gameState.animals.filter(animal => {
+                const age = now - animal.spawnTime;
+                
+                // Fade in
+                if (age < 200) {
+                    animal.opacity = age / 200;
+                    animal.scale = 0.5 + (age / 200) * 0.5;
+                }
+                // Stay visible
+                else if (age < animal.lifetime - 300) {
+                    animal.opacity = 1;
+                    animal.scale = 1;
+                }
+                // Fade out
+                else if (age < animal.lifetime) {
+                    const fadeProgress = (age - (animal.lifetime - 300)) / 300;
+                    animal.opacity = 1 - fadeProgress;
+                    animal.scale = 1 - fadeProgress * 0.3;
+                }
+                // Remove
+                else {
+                    return false;
+                }
+                
+                return true;
+            });
+
+            // Render
+            render();
+
+            gameState.animationId = requestAnimationFrame(gameLoop);
+        }
+
+        function render() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw background pattern (doodle style dots)
+            ctx.fillStyle = 'rgba(139, 119, 101, 0.1)';
+            for (let x = 0; x < canvas.width; x += 30) {
+                for (let y = 0; y < canvas.height; y += 30) {
+                    ctx.beginPath();
+                    ctx.arc(x + Math.sin(x + y) * 3, y + Math.cos(x + y) * 3, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // Draw animals
+            gameState.animals.forEach(animal => {
+                ctx.save();
+                ctx.globalAlpha = animal.opacity;
+                ctx.translate(animal.x + animal.size / 2, animal.y + animal.size / 2);
+                ctx.rotate(animal.rotation);
+                ctx.scale(animal.scale, animal.scale);
+                
+                // Draw doodle circle behind animal
+                ctx.beginPath();
+                ctx.arc(0, 0, animal.size / 2 + 5, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.fill();
+                ctx.strokeStyle = '#5d4037';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Draw animal emoji
+                ctx.font = `${animal.size}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(animal.emoji, 0, 0);
+                
+                ctx.restore();
+            });
+        }
+
+        // Input Handling
+        function handleTap(e) {
+            if (!gameState.isPlaying) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            checkAnimalTap(x, y);
+        }
+
+        function handleTouch(e) {
+            e.preventDefault();
+            if (!gameState.isPlaying) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches[0];
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+
+            checkAnimalTap(x, y);
+        }
+
+        function checkAnimalTap(x, y) {
+            // Check animals in reverse order (top to bottom)
+            for (let i = gameState.animals.length - 1; i >= 0; i--) {
+                const animal = gameState.animals[i];
+                const centerX = animal.x + animal.size / 2;
+                const centerY = animal.y + animal.size / 2;
+                const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+
+                if (distance < animal.size / 2 + 10) {
+                    // Animal tapped!
+                    if (animal.emoji === gameState.targetAnimal.emoji) {
+                        // Correct!
+                        gameState.score++;
+                        showFeedback(x, y, '+1', true);
+                    } else {
+                        // Wrong!
+                        gameState.score = Math.max(0, gameState.score - 1);
+                        showFeedback(x, y, '-1', false);
+                    }
+                    
+                    updateScore();
+                    
+                    // Update HUD high score in real-time
+                    if (gameState.score > gameState.highScore) {
+                        hudHighScoreDisplay.textContent = `Best: ${gameState.score}`;
+                    }
+                    
+                    // Remove tapped animal
+                    gameState.animals.splice(i, 1);
+                    return;
+                }
+            }
+        }
+
+        function showFeedback(x, y, text, isCorrect) {
+            const feedback = document.createElement('div');
+            feedback.className = `tap-feedback ${isCorrect ? 'correct' : 'wrong'}`;
+            feedback.textContent = text;
+            feedback.style.left = `${x}px`;
+            feedback.style.top = `${y}px`;
+            gameContainer.appendChild(feedback);
+
+            setTimeout(() => {
+                feedback.remove();
+            }, 500);
+        }
+
+        // Request game data from parent on load
+        window.addEventListener('load', () => {
+            // Initialize high score display to 0 first
+            updateHighScoreDisplays();
+            
+            // Try to load from parent
+            window.parent.postMessage({
+                type: 'applaa-game-load-data',
+                gameId: GAME_ID
+            }, '*');
+        });
+
+        // Listen for data from parent
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'applaa-game-data-loaded') {
+                const data = event.data.data;
+                if (data) {
+                    gameState.highScore = data.highScore || 0;
+                    gameState.scores = data.scores || [];
+                    gameState.playerName = data.lastPlayerName || '';
+                    
+                    if (gameState.playerName) {
+                        playerNameInput.value = gameState.playerName;
+                    }
+                    
+                    updateHighScoreDisplays();
+                }
+            }
+        });
+
+        // Initialize game
+        init();
+    </script>
+</body>
+</html>
